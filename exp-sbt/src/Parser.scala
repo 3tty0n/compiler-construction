@@ -4,12 +4,12 @@ import Tokens._
 
 class Parser (aSrc: Iterator[Token]) {
 
-  val src = aSrc
+  val src: Iterator[Token] = aSrc
   var tok: Token = src.next()
 
-  def advance () =  tok = src.next() 
+  def advance(): Unit =  tok = src.next()
 
-  def eat (t: Token) = 
+  def eat(t: Token): Unit =
     if (tok == t) advance() else error()
 
   def F(): Exp =

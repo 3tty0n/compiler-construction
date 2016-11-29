@@ -2,29 +2,27 @@ import Base._
 import Tokens._
 
 class Lexer (aSrc: String) extends Iterator[Token] {
-  val src = aSrc.iterator
+  val src: Iterator[Char] = aSrc.iterator
   var lastChar: Option[Char] = None
 
-  def getChar(): Option[Char] = {
+  def getChar: Option[Char] = {
     lastChar match {
-      case Some(c) => {
+      case Some(c) =>
         lastChar = None
         Some(c)
-      }
       case None =>
         if (src.hasNext) Some(src.next) else None
     }
   }
 
-  def ungetChar(c: Char) = {
+  def ungetChar(c: Char): Unit = {
     lastChar = Some(c)
   }
 
   def lexMain(): Token =
-    getChar() match {
+    getChar match {
       case None => EOF
-      case Some(c) => {
-        c match {
+      case Some(c) => c match {
           case _ if c.isLetter => lexId(c.toString)
           case _ if c.isDigit => lexInt(c.toString)
           case '(' => LPAREN
@@ -34,11 +32,10 @@ class Lexer (aSrc: String) extends Iterator[Token] {
           case '*' => TIMES
           case '/' => DIV
         }
-      }
     }
 
   def lexId(ts: String): Token =
-    getChar() match {
+    getChar match {
       case None => VAR(ts)
       case Some(c) =>
         if (c.isLetter) lexId (ts+c)
@@ -48,7 +45,7 @@ class Lexer (aSrc: String) extends Iterator[Token] {
     }
 
   def lexInt(ts: String): Token =
-    getChar() match {
+    getChar match {
       case None => INT(ts.toInt)
       case Some(c) =>
         if (c.isDigit) lexInt (ts+c)
@@ -58,6 +55,6 @@ class Lexer (aSrc: String) extends Iterator[Token] {
         }
     }
 
-  def next() = lexMain()
+  def next(): Token = lexMain()
   var hasNext= true
 }
