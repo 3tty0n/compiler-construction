@@ -3,10 +3,20 @@ lazy val commonSettings = Seq(
   version := "0.1.0",
   libraryDependencies ++= Seq(
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  ),
+  scalacOptions ++= Seq(
+    "-optimize",
+    "-feature",
+    "-unchecked",
+    "-deprecation"
+  ),
+  javaOptions in run ++= Seq(
+    "-Xmx2G",
+    "-verbose:gc"
   )
 )
 
-lazy val exp = (project in file("exp-sbt"))
+lazy val expsbt = (project in file("exp-sbt"))
   .settings(commonSettings)
   .settings(
     name := "exp-sbt"
@@ -17,4 +27,4 @@ lazy val root = (project in file("."))
   .settings(
     name := "compiler construction"
   )
-  .aggregate(exp)
+  .aggregate(expsbt)
