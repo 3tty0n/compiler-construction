@@ -16,16 +16,22 @@ lazy val commonSettings = Seq(
   )
 )
 
-lazy val expsbt = (project in file("exp-sbt"))
+lazy val exp = (project in file("exp-sbt"))
   .settings(commonSettings: _*)
   .settings(
     name := "exp-sbt"
   )
 
-lazy val lexsbt = (project in file("lex-sbt"))
+lazy val lex = (project in file("lex-sbt"))
   .settings(commonSettings: _*)
   .settings(
     name := "lex-sbt"
+  )
+
+lazy val automata = (project in file("automata-sbt"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "automata-sbt"
   )
 
 lazy val root = (project in file("."))
@@ -33,4 +39,8 @@ lazy val root = (project in file("."))
   .settings(
     name := "compiler construction"
   )
-  .aggregate(expsbt, lexsbt)
+  .aggregate(
+    exp,
+    lex,
+    automata
+  )
