@@ -35,6 +35,12 @@ lazy val automata = (project in file("automata-sbt"))
     name := "automata-sbt"
   )
 
+lazy val parsing = (project in file("parsing-sbt"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "parsing-sbt"
+  )
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
