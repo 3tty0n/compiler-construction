@@ -11,7 +11,7 @@ class DFA[Q, A](
       case a :: w => trans(transition(q, a), w)
     }
 
-  def accept(w: List[A]) =
+  def accept(w: List[A]): Boolean =
     try
       finalStates.contains(trans(q0, w))
     catch {
@@ -26,10 +26,10 @@ class NFA[Q, A](
                  val q0: Q,
                  val finalStates: Set[Q]) {
 
-  val transition = t.withDefaultValue(Set())
+  val transition: Map[(Q, Option[A]), Set[Q]] = t.withDefaultValue(Set())
   // キーに対して値が定義されていないときに空集合を返す
 
-  def eclosure(aQs: Set[Q]) = {
+  def eclosure(aQs: Set[Q]): Set[Q] = {
     var qs = Set[Q]()
     var newQs = aQs
     while (newQs != qs) {
@@ -47,7 +47,7 @@ class NFA[Q, A](
 
   def trans(q: Q, w: List[A]): Set[Q] = transSet(Set(q), w)
 
-  def accept(w: List[A]) =
+  def accept(w: List[A]): Boolean =
     (trans(q0, w) & finalStates).nonEmpty
 
   def toDFA(): DFA[Set[Q], A] = {
