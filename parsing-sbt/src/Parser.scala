@@ -7,7 +7,10 @@ class Parser(val src: Yylex) {
 
   var tok: Token = src.yylex()
 
-  def advance(): Unit = tok = src.yylex()
+  def advance(): Unit = {
+    val lex = src.yylex()
+    tok = lex
+  }
 
   def eat(t: Token): Unit =
     if (tok == t) advance() else error()
@@ -61,9 +64,8 @@ class Parser(val src: Yylex) {
 
   def CPrime(e: Exp): Exp =
     tok match {
-      case COLONCOLON => eat(COLONCOLON); CPrime(BOpExp(ConsOp, e, C()))
-      case EOF => e
-      case _ => error()
+      case COLONCOLON => eat(COLONCOLON); BOpExp(ConsOp, e, C())
+      case _ => e
     }
 
   def B(): Exp =
@@ -72,16 +74,25 @@ class Parser(val src: Yylex) {
       case _ => error()
     }
 
-  def BPrime(e: Exp): Exp = tok match {
-    case EQEQ => eat(EQEQ); E()
-    case LESS => eat(LESS); E()
-    case LPAREN | EOF => e
-    case _ => error()
-  }
+  def BPrime(e: Exp): Exp =
+    tok match {
+      case EQEQ => eat(EQEQ); BOpExp(EqOp, e, E())
+      case LESS => eat(LESS); BOpExp(LtOp, e, E())
+      case RPAREN | EOF => e
+      case _ => error()
+    }
 
   def I(): Exp = tok match {
     case ID(_) | INT(_) | LPAREN | NIL => C()
-    case IF => eat(IF); eat(LPAREN); B(); eat(RPAREN); I(); eat(ELSE); I()
+    case IF =>
+      eat(IF)
+      eat(LPAREN)
+      val b = B()
+      eat(RPAREN)
+      val i1 = I()
+      eat(ELSE)
+      val i2 = I()
+      IfExp(b, i1, i2)
     case _ => error()
   }
 }
