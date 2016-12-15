@@ -3,13 +3,13 @@ import Oper._
 import Abssyn._
 import Tokens._
 
-class Parser (val src: Yylex) {
+class Parser(val src: Yylex) {
 
-  var tok: Token = src.yylex
+  var tok: Token = src.yylex()
 
-  def advance () =  tok = src.yylex
+  def advance(): Unit = tok = src.yylex()
 
-  def eat (t: Token) = 
+  def eat(t: Token): Unit =
     if (tok == t) advance() else error()
 
   def F(): Exp =
@@ -18,35 +18,71 @@ class Parser (val src: Yylex) {
       case INT(i) => advance(); IntExp(i)
       case ID(s) => advance(); VarExp(s)
       case LPAREN =>
-        {
-          eat(LPAREN)
-          val e = E()
-          eat(RPAREN)
-          e
-        }
+        eat(LPAREN)
+        val e = E()
+        eat(RPAREN)
+        e
       case _ => error()
     }
 
   def T(): Exp =
     tok match {
-      case ID(_) | INT(_) | LPAREN | NIL =>  Tprime(F())
+      case ID(_) | INT(_) | LPAREN | NIL => TPrime(F())
       case _ => error()
     }
 
-  def Tprime(e: Exp): Exp =
+  def TPrime(e: Exp): Exp =
     tok match {
-      case TIMES => eat(TIMES); Tprime(BOpExp(TimesOp, e, F()))
-      case DIV => eat(DIV); Tprime(BOpExp(DivideOp, e, F()))
-      case PLUS | MINUS| RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON => e
+      case TIMES => eat(TIMES); TPrime(BOpExp(TimesOp, e, F()))
+      case DIV => eat(DIV); TPrime(BOpExp(DivideOp, e, F()))
+      case PLUS | MINUS | RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON => e
       case _ => error()
     }
 
-  def E(): Exp = T()  // プログラムを書く．補助関数も必要
+  def E(): Exp =
+    tok match {
+      case ID(_) | INT(_) | LPAREN | NIL => EPrime(T())
+      case _ => error()
+    }
 
-  def C(): Exp = E()  // プログラムを書く．補助関数も必要
+  def EPrime(e: Exp): Exp =
+    tok match {
+      case PLUS => eat(PLUS); EPrime(BOpExp(PlusOp, e, T()))
+      case MINUS => eat(MINUS); EPrime(BOpExp(MinusOp, e, T()))
+      case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON => e
+      case _ => error()
+    }
 
-  def B(): Exp = E()  // プログラムを書く．補助関数も必要
+  def C(): Exp =
+    tok match {
+      case ID(_) | INT(_) | NIL | LPAREN => CPrime(E())
+      case _ => error()
+    }
 
-  def I(): Exp = C()  // プログラムを書く．
+  def CPrime(e: Exp): Exp =
+    tok match {
+      case COLONCOLON => eat(COLONCOLON); CPrime(BOpExp(ConsOp, e, C()))
+      case EOF => e
+      case _ => error()
+    }
+
+  def B(): Exp =
+    tok match {
+      case ID(_) | INT(_) | LPAREN | NIL => BPrime(E())
+      case _ => error()
+    }
+
+  def BPrime(e: Exp): Exp = tok match {
+    case EQEQ => eat(EQEQ); E()
+    case LESS => eat(LESS); E()
+    case LPAREN | EOF => e
+    case _ => error()
+  }
+
+  def I(): Exp = tok match {
+    case ID(_) | INT(_) | LPAREN | NIL => C()
+    case IF => eat(IF); eat(LPAREN); B(); eat(RPAREN); I(); eat(ELSE); I()
+    case _ => error()
+  }
 }
 
