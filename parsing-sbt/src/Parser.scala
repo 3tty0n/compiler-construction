@@ -25,35 +25,47 @@ class Parser(val src: Yylex) {
         val e = E()
         eat(RPAREN)
         e
-      case _ => error()
+      case _ @ token =>
+        throw new UnboundValidException(message = token.toString)
     }
 
   def T(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL => TPrime(F())
-      case _ => error()
+      case _ @ token =>
+        throw new UnboundValidException(message = token.toString)
     }
 
   def TPrime(e: Exp): Exp =
     tok match {
-      case TIMES => eat(TIMES); TPrime(BOpExp(TimesOp, e, F()))
-      case DIV => eat(DIV); TPrime(BOpExp(DivideOp, e, F()))
-      case PLUS | MINUS | RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON => e
-      case _ => error()
+      case TIMES =>
+        eat(TIMES); TPrime(BOpExp(TimesOp, e, F()))
+      case DIV =>
+        eat(DIV); TPrime(BOpExp(DivideOp, e, F()))
+      case PLUS | MINUS | RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON =>
+        e
+      case _ @ token =>
+        throw new UnboundValidException(message = token.toString)
     }
 
   def E(): Exp =
     tok match {
-      case ID(_) | INT(_) | LPAREN | NIL => EPrime(T())
-      case _ => error()
+      case ID(_) | INT(_) | LPAREN | NIL =>
+        EPrime(T())
+      case _ @ error =>
+        throw new UnboundValidException(message = error.toString)
     }
 
   def EPrime(e: Exp): Exp =
     tok match {
-      case PLUS => eat(PLUS); EPrime(BOpExp(PlusOp, e, T()))
-      case MINUS => eat(MINUS); EPrime(BOpExp(MinusOp, e, T()))
-      case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON => e
-      case _ => error()
+      case PLUS =>
+        eat(PLUS); EPrime(BOpExp(PlusOp, e, T()))
+      case MINUS =>
+        eat(MINUS); EPrime(BOpExp(MinusOp, e, T()))
+      case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON =>
+        e
+      case _  @ error =>
+        throw new UnboundValidException(message = error.toString)
     }
 
   def C(): Exp =
@@ -64,8 +76,10 @@ class Parser(val src: Yylex) {
 
   def CPrime(e: Exp): Exp =
     tok match {
-      case COLONCOLON => eat(COLONCOLON); BOpExp(ConsOp, e, C())
-      case _ => e
+      case COLONCOLON =>
+        eat(COLONCOLON); BOpExp(ConsOp, e, C())
+      case _ =>
+        e
     }
 
   def B(): Exp =
@@ -76,14 +90,19 @@ class Parser(val src: Yylex) {
 
   def BPrime(e: Exp): Exp =
     tok match {
-      case EQEQ => eat(EQEQ); BOpExp(EqOp, e, E())
-      case LESS => eat(LESS); BOpExp(LtOp, e, E())
-      case RPAREN | EOF => e
-      case _ => error()
+      case EQEQ =>
+        eat(EQEQ); BOpExp(EqOp, e, E())
+      case LESS =>
+        eat(LESS); BOpExp(LtOp, e, E())
+      case RPAREN | EOF =>
+        e
+      case _ @ token =>
+        throw new UnboundValidException(message = token.toString)
     }
 
   def I(): Exp = tok match {
-    case ID(_) | INT(_) | LPAREN | NIL => C()
+    case ID(_) | INT(_) | LPAREN | NIL =>
+      C()
     case IF =>
       eat(IF)
       eat(LPAREN)
@@ -93,7 +112,8 @@ class Parser(val src: Yylex) {
       eat(ELSE)
       val i2 = I()
       IfExp(b, i1, i2)
-    case _ => error()
+    case _ @ token =>
+      throw new UnboundValidException(message = token.toString)
   }
 }
 

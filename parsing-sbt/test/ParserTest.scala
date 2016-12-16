@@ -23,7 +23,6 @@ class ParserTest extends FlatSpec {
       BOpExp(PlusOp, VarExp("abc"), BOpExp(TimesOp, IntExp(10), IntExp(20))))
   }
 
-
   "::" should "右に強く結合" in {
     assert(Main.parseStr("10 :: 20 :: Nil") ===
       BOpExp(ConsOp, IntExp(10), BOpExp(ConsOp, IntExp(20), NilExp)))
@@ -46,7 +45,7 @@ class ParserTest extends FlatSpec {
   }
 
   "if文のネスト" should "" in {
-    assert(Main.parseStr("if(10 == 20) x else if (x == y) 1 else 2") ===
+    assert(Main.parseStr("if (10 == 20) x else if (x == y) 1 else 2") ===
       IfExp(BOpExp(EqOp, IntExp(10), IntExp(20)), VarExp("x"),
         IfExp(BOpExp(EqOp, VarExp("x"), VarExp("y")), IntExp(1), IntExp(2))))
   }
