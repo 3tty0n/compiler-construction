@@ -26,14 +26,18 @@ class Parser(val src: Yylex) {
         eat(RPAREN)
         e
       case _ @ token =>
-        throw new UnboundValidException(message = token.toString)
+        throw new UnboundValidException(
+          message = s"F\nexpected: Nil, num, id, (E)\nactual: $token"
+        )
     }
 
   def T(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL => TPrime(F())
       case _ @ token =>
-        throw new UnboundValidException(message = token.toString)
+        throw new UnboundValidException(
+          message = s"T\nexpected: id, num, (, Nil\nactual: $token"
+        )
     }
 
   def TPrime(e: Exp): Exp =
@@ -45,15 +49,19 @@ class Parser(val src: Yylex) {
       case PLUS | MINUS | RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON =>
         e
       case _ @ token =>
-        throw new UnboundValidException(message = token.toString)
+        throw new UnboundValidException(
+          message = s"T'\nexpected: *, / +, -, ), EOF, else, ==, <, ::\nactual: $token"
+        )
     }
 
   def E(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL =>
         EPrime(T())
-      case _ @ error =>
-        throw new UnboundValidException(message = error.toString)
+      case _ @ token =>
+        throw new UnboundValidException(
+          message = s"E\nexpected: id, num, (, Nil\nactual: $token"
+        )
     }
 
   def EPrime(e: Exp): Exp =
@@ -64,14 +72,20 @@ class Parser(val src: Yylex) {
         eat(MINUS); EPrime(BOpExp(MinusOp, e, T()))
       case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON =>
         e
-      case _  @ error =>
-        throw new UnboundValidException(message = error.toString)
+      case _  @ token =>
+        throw new UnboundValidException(
+          message = s"E'\nexpected: +, -, ), EOF, else, ==, <, ::\nactual: $token"
+        )
     }
 
   def C(): Exp =
     tok match {
-      case ID(_) | INT(_) | NIL | LPAREN => CPrime(E())
-      case _ => error()
+      case ID(_) | INT(_) | NIL | LPAREN =>
+        CPrime(E())
+      case _ @ token =>
+        throw new UnboundValidException(
+          message = s"C\nexpected: id, num, Nil, (\nactual: $token"
+        )
     }
 
   def CPrime(e: Exp): Exp =
@@ -85,7 +99,10 @@ class Parser(val src: Yylex) {
   def B(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL => BPrime(E())
-      case _ => error()
+      case _ @ token =>
+        throw new UnboundValidException(
+          message = s"B\nexpected: id, num, (, Nil\nactual: $token"
+        )
     }
 
   def BPrime(e: Exp): Exp =
@@ -97,7 +114,9 @@ class Parser(val src: Yylex) {
       case RPAREN | EOF =>
         e
       case _ @ token =>
-        throw new UnboundValidException(message = token.toString)
+        throw new UnboundValidException(
+          message = s"B'\nexpected: ==, <, ), EOF\nactual: $token"
+        )
     }
 
   def I(): Exp = tok match {
@@ -113,7 +132,11 @@ class Parser(val src: Yylex) {
       val i2 = I()
       IfExp(b, i1, i2)
     case _ @ token =>
-      throw new UnboundValidException(message = token.toString)
+       throw new UnboundValidException(
+         message = s"I\nexpected: if, id, num\nactual: $token"
+       )
+  }
+
   }
 }
 
