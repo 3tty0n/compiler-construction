@@ -13,13 +13,21 @@ class Parser(val src: Yylex) {
   }
 
   def eat(t: Token): Unit =
-    if (tok == t) advance() else error()
+    if (tok == t)
+      advance()
+    else
+      throw new UnboundValidException(
+        message = s"eating error... token is $t"
+      )
 
   def F(): Exp =
     tok match {
-      case NIL => advance(); NilExp
-      case INT(i) => advance(); IntExp(i)
-      case ID(s) => advance(); VarExp(s)
+      case NIL =>
+        advance(); NilExp
+      case INT(i) =>
+        advance(); IntExp(i)
+      case ID(s) =>
+        advance(); VarExp(s)
       case LPAREN =>
         eat(LPAREN)
         val e = E()
