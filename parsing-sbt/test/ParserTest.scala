@@ -1,5 +1,6 @@
 import org.scalatest._
 import Abssyn._
+import Base.UnboundValidException
 import Oper._
 
 class ParserTest extends FlatSpec {
@@ -48,6 +49,17 @@ class ParserTest extends FlatSpec {
     assert(Main.parseStr("if (10 == 20) x else if (x == y) 1 else 2") ===
       IfExp(BOpExp(EqOp, IntExp(10), IntExp(20)), VarExp("x"),
         IfExp(BOpExp(EqOp, VarExp("x"), VarExp("y")), IntExp(1), IntExp(2))))
+  }
+
+  it should "構文エラーを検出できる" in {
+    val message = intercept[UnboundValidException] {
+      val exp =
+        """
+          | ))) if )( 123
+        """.stripMargin
+      Main.parseStr(exp)
+    }.getMessage
+    assert(message === "expected: if, id, num\nactual: RPAREN")
   }
 
 
