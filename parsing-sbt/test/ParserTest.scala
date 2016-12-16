@@ -51,15 +51,22 @@ class ParserTest extends FlatSpec {
         IfExp(BOpExp(EqOp, VarExp("x"), VarExp("y")), IntExp(1), IntExp(2))))
   }
 
-  it should "構文エラーを検出できる" in {
-    val message = intercept[UnboundValidException] {
+  "Parser" should "構文エラーを検出できる" in {
+    intercept[UnboundValidException] {
       val exp =
         """
           | ))) if )( 123
         """.stripMargin
       Main.parseStr(exp)
-    }.getMessage
-    assert(message === "expected: if, id, num\nactual: RPAREN")
+    }
+
+    intercept[UnboundValidException] {
+      val exp =
+        """
+          | else if if
+        """.stripMargin
+      Main.parseStr(exp)
+    }
   }
 
 
