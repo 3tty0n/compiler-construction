@@ -25,6 +25,7 @@ lazy val exp = (project in file("exp-sbt"))
 
 lazy val lex = (project in file("lex-sbt"))
   .settings(commonSettings: _*)
+  .settings(sbtjflex.SbtJFlexPlugin.jflexSettings: _*)
   .settings(
     name := "lex-sbt"
   )
