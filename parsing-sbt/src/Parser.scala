@@ -27,7 +27,7 @@ class Parser(val src: Yylex) {
         e
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"F\nexpected: Nil, num, id, (E)\nactual: $token"
+          message = s"param: F\nexpected: Nil, num, id, (E)\nactual: $token"
         )
     }
 
@@ -36,7 +36,7 @@ class Parser(val src: Yylex) {
       case ID(_) | INT(_) | LPAREN | NIL => TPrime(F())
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"T\nexpected: id, num, (, Nil\nactual: $token"
+          message = s"param: T\nexpected: id, num, (, Nil\nactual: $token"
         )
     }
 
@@ -50,7 +50,7 @@ class Parser(val src: Yylex) {
         e
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"T'\nexpected: *, / +, -, ), EOF, else, ==, <, ::\nactual: $token"
+          message = s"param: T'\nexpected: *, / +, -, ), EOF, else, ==, <, ::\nactual: $token"
         )
     }
 
@@ -60,7 +60,7 @@ class Parser(val src: Yylex) {
         EPrime(T())
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"E\nexpected: id, num, (, Nil\nactual: $token"
+          message = s"param: E\nexpected: id, num, (, Nil\nactual: $token"
         )
     }
 
@@ -74,7 +74,7 @@ class Parser(val src: Yylex) {
         e
       case _  @ token =>
         throw new UnboundValidException(
-          message = s"E'\nexpected: +, -, ), EOF, else, ==, <, ::\nactual: $token"
+          message = s"param: E'\nexpected: +, -, ), EOF, else, ==, <, ::\nactual: $token"
         )
     }
 
@@ -84,7 +84,7 @@ class Parser(val src: Yylex) {
         CPrime(E())
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"C\nexpected: id, num, Nil, (\nactual: $token"
+          message = s"param: C\nexpected: id, num, Nil, (\nactual: $token"
         )
     }
 
@@ -101,7 +101,7 @@ class Parser(val src: Yylex) {
       case ID(_) | INT(_) | LPAREN | NIL => BPrime(E())
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"B\nexpected: id, num, (, Nil\nactual: $token"
+          message = s"param: B\nexpected: id, num, (, Nil\nactual: $token"
         )
     }
 
@@ -115,7 +115,7 @@ class Parser(val src: Yylex) {
         e
       case _ @ token =>
         throw new UnboundValidException(
-          message = s"B'\nexpected: ==, <, ), EOF\nactual: $token"
+          message = s"param: B'\nexpected: ==, <, ), EOF\nactual: $token"
         )
     }
 
@@ -133,7 +133,7 @@ class Parser(val src: Yylex) {
       IfExp(b, i1, i2)
     case _ @ token =>
        throw new UnboundValidException(
-         message = s"I\nexpected: if, id, num\nactual: $token"
+         message = s"param: I\nexpected: if, id, num\nactual: $token"
        )
   }
 
