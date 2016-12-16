@@ -41,7 +41,8 @@ class Parser(val src: Yylex) {
 
   def T(): Exp =
     tok match {
-      case ID(_) | INT(_) | LPAREN | NIL => TPrime(F())
+      case ID(_) | INT(_) | LPAREN | NIL =>
+        TPrime(F())
       case _ @ token =>
         throw new UnboundValidException(
           message = s"param: T\nexpected: id, num, (, Nil\nactual: $token"
