@@ -137,6 +137,12 @@ class Parser(val src: Yylex) {
        )
   }
 
+  def skipTo(stop: Token): Unit = {
+    if (tok == stop)
+      ()
+    else
+      eat(tok)
+      skipTo(stop)
   }
 }
 
