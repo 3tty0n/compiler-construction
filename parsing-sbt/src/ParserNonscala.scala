@@ -16,7 +16,7 @@ class ParserNonscala(val src: Yylex) {
     )
 
 
-  def F(): Exp = // 拡張が必要
+  def F(): Exp =
     tok match {
       case NIL =>
         advance(); NilExp
@@ -30,7 +30,7 @@ class ParserNonscala(val src: Yylex) {
         eat(RPAREN)
         e
       case _ =>
-        error(
+        throw new UnboundValidException(
           message = s"expected NIL, num, (E), id, but actual $tok"
         )
     }
@@ -45,22 +45,20 @@ class ParserNonscala(val src: Yylex) {
           case _ => throw new UnboundValidException(s"expected VarExp, but actual is $e")
         }
         eat(LPAREN)
-        val listExp = FPrimeAux(e)
+        val listExp = FPrimeAux()
         eat(RPAREN)
         AppExp(name, listExp)
-      case PLUS | MINUS | TIMES | DIV | RPAREN | ELSE | EQEQ | EOF | COLONCOLON | LESS | DEF => e
+      case PLUS | MINUS | TIMES | DIV | RPAREN | ELSE | EQEQ | EOF | COLONCOLON | LESS | DEF | CAMMA => e
       case _ => throw new UnboundValidException(s"expected . ( + - * / ) else end-of-file, but $tok")
     }
 
-  def FPrimeAux(e: Exp): List[Exp] = {
+  def FPrimeAux(): List[Exp] = {
+    val e = E()
     tok match {
-      case RPAREN => Nil
       case CAMMA =>
-        eat(CAMMA)
-        val ee = E()
-        ee :: FPrimeAux(e)
-      case INT(i) => advance(); IntExp(i) :: FPrimeAux(e)
-      case ID(s) => advance(); VarExp(s) :: FPrimeAux(e)
+        eat(CAMMA); e :: FPrimeAux()
+      case RPAREN =>
+        e :: Nil
       case _ => throw new UnboundValidException(s"expected ), , but $tok")
     }
   }

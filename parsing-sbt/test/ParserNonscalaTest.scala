@@ -1,10 +1,12 @@
+import java.io.{File, FileReader}
+
 import org.scalatest._
 import Oper._
 import Ty._
 import Abssyn._
 
 class ParserNonscalaTest extends FlatSpec {
-  def parseStr(s: String) = {
+  def parseStr(s: String): Exp = {
     val lexer = new Yylex(new java.io.StringReader(s))
     val parser = new ParserNonscala(lexer)
     parser.I()
@@ -21,6 +23,13 @@ class ParserNonscalaTest extends FlatSpec {
     val lexer = new Yylex(new java.io.FileReader(f))
     val parser = new ParserNonscala(lexer)
     parser.D()
+  }
+
+  def parseFileDefs(s: String): List[Def] = {
+    val f = new File(s)
+    val lexer = new Yylex(new FileReader(f))
+    val parser = new ParserNonscala(lexer)
+    parser.Ds()
   }
 
 
@@ -88,12 +97,12 @@ class ParserNonscalaTest extends FlatSpec {
   }
 
 
-  "関数定義" should "" in {
+  "関数定義" should "正しく構文解析できる" in {
     assert(parseStrDef("def f(x:Int, y:Boolean): List[Int] = Nil") ===
       Def("f", List(("x", IntTy), ("y", BoolTy)), IntListTy, NilExp))
   }
 
-  "例: insert" should "" in {
+  "例: insert" should "正しく構文解析できる" in {
     assert(parseFileDef("parsing-sbt/examples/insert.scala") ===
       Def("insert", List(("x", IntTy), ("l", IntListTy)), IntListTy,
         IfExp(UOpExp(IsEmptyOp, VarExp("l")),
@@ -102,6 +111,27 @@ class ParserNonscalaTest extends FlatSpec {
             BOpExp(ConsOp, VarExp("x"), VarExp("l")),
             BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
               AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))))
+
+    assert(parseFileDef("parsing-sbt/examples/sort.scala") ===
+      Def("insert", List(("x", IntTy), ("l", IntListTy)), IntListTy,
+        IfExp(UOpExp(IsEmptyOp, VarExp("l")), BOpExp(ConsOp, VarExp("x"), NilExp),
+          IfExp(BOpExp(LtOp, VarExp("x"), UOpExp(HeadOp, VarExp("l"))), BOpExp(ConsOp, VarExp("x"), VarExp("l")), BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
+            AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))))
   }
+
+  "例: insert, test" should "正しく構文解析できる" in {
+    assert(parseFileDefs("parsing-sbt/examples/insert.scala") ===
+      List(
+        Def("insert", List(("x", IntTy), ("l", IntListTy)),
+          IntListTy, IfExp(UOpExp(IsEmptyOp, VarExp("l")), BOpExp(ConsOp, VarExp("x"), NilExp),
+            IfExp(BOpExp(LtOp, VarExp("x"), UOpExp(HeadOp, VarExp("l"))),
+              BOpExp(ConsOp, VarExp("x"), VarExp("l")), BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
+                AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))),
+        Def("test", List(("n", IntTy)), IntListTy,
+          IfExp(BOpExp(EqOp, VarExp("n"), IntExp(0)), NilExp,
+            AppExp("insert", List(VarExp("n"), AppExp("test", List(BOpExp(MinusOp, VarExp("n"), IntExp(1)))))))))
+    )
+  }
+
 
 }
