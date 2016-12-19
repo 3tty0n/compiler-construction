@@ -94,7 +94,7 @@ class ParserNonscalaTest extends FlatSpec {
   }
 
   "例: insert" should "" in {
-    assert(parseFileDef("examples/insert.scala") ===
+    assert(parseFileDef("parsing-sbt/examples/insert.scala") ===
       Def("insert", List(("x", IntTy), ("l", IntListTy)), IntListTy,
         IfExp(UOpExp(IsEmptyOp, VarExp("l")),
           BOpExp(ConsOp, VarExp("x"), NilExp),

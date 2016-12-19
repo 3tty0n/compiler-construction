@@ -4,19 +4,19 @@ import Ty._
 import Abssyn._
 import Tokens._
 
-class ParserNonscala (val src: Yylex) {
+class ParserNonscala(val src: Yylex) {
 
   var tok: Token = src.yylex()
 
-  def advance(): Unit =  tok = src.yylex()
+  def advance(): Unit = tok = src.yylex()
 
-  def eat(t: Token): Unit  =
+  def eat(t: Token): Unit =
     if (tok == t) advance() else throw new UnboundValidException(
       message = s"eating error expected $t, but actual $tok"
     )
 
 
-  def F(): Exp =    // 拡張が必要
+  def F(): Exp = // 拡張が必要
     tok match {
       case NIL =>
         advance(); NilExp
@@ -48,7 +48,7 @@ class ParserNonscala (val src: Yylex) {
         val listExp = FPrimeAux(e)
         eat(RPAREN)
         AppExp(name, listExp)
-      case PLUS | MINUS | TIMES | DIV | RPAREN | ELSE | EQEQ | EOF => e
+      case PLUS | MINUS | TIMES | DIV | RPAREN | ELSE | EQEQ | EOF | COLONCOLON | LESS | DEF => e
       case _ => throw new UnboundValidException(s"expected . ( + - * / ) else end-of-file, but $tok")
     }
 
@@ -89,7 +89,7 @@ class ParserNonscala (val src: Yylex) {
         eat(TIMES); TPrime(BOpExp(TimesOp, e, F()))
       case DIV =>
         eat(DIV); TPrime(BOpExp(DivideOp, e, F()))
-      case PLUS | MINUS| RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON | CAMMA =>
+      case PLUS | MINUS | RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON | CAMMA | DEF =>
         e
       case _ =>
         throw new UnboundValidException(
@@ -97,23 +97,14 @@ class ParserNonscala (val src: Yylex) {
         )
     }
 
-  def U(): Ty =
-    tok match {
-      case ID("Int") =>
-        advance(); IntTy
-      case ID("Boolean") =>
-        advance(); BoolTy
-      case ID("List[Int]") =>
-        advance(); IntListTy
-      case _ =>
-        throw new UnboundValidException(message = "expected Int, Boolean, List[Int]")
-    }
 
   def E(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL | EOF =>
         EPrime(T())
-      case _ @ token =>
+      case IF =>
+        I()
+      case _@token =>
         throw new UnboundValidException(
           message = s"param: E\nexpected: id, num, (, Nil\nactual: $token"
         )
@@ -125,9 +116,9 @@ class ParserNonscala (val src: Yylex) {
         eat(PLUS); EPrime(BOpExp(PlusOp, e, T()))
       case MINUS =>
         eat(MINUS); EPrime(BOpExp(MinusOp, e, T()))
-      case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON | CAMMA =>
+      case RPAREN | EOF | ELSE | EQEQ | LESS | COLONCOLON | CAMMA | DEF =>
         e
-      case _  @ token =>
+      case _@token =>
         throw new UnboundValidException(
           message = s"param: E'\nexpected: +, -, ), EOF, else, ==, <, ::\nactual: $token"
         )
@@ -138,7 +129,7 @@ class ParserNonscala (val src: Yylex) {
     tok match {
       case ID(_) | INT(_) | NIL | LPAREN =>
         CPrime(E())
-      case _ @ token =>
+      case _@token =>
         throw new UnboundValidException(
           message = s"param: C\nexpected: id, num, Nil, (\nactual: $token"
         )
@@ -164,7 +155,7 @@ class ParserNonscala (val src: Yylex) {
       eat(ELSE)
       val i2 = I()
       IfExp(b, i1, i2)
-    case _ @ token =>
+    case _@token =>
       throw new UnboundValidException(
         message = s"param: I\nexpected: if, id, num\nactual: $token"
       )
@@ -173,7 +164,7 @@ class ParserNonscala (val src: Yylex) {
   def B(): Exp =
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL => BPrime(E())
-      case _ @ token =>
+      case _@token =>
         throw new UnboundValidException(
           message = s"param: B\nexpected: id, num, (, Nil\nactual: $token"
         )
@@ -187,15 +178,56 @@ class ParserNonscala (val src: Yylex) {
         eat(LESS); BOpExp(LtOp, e, E())
       case RPAREN | EOF =>
         e
-      case _ @ token =>
+      case _@token =>
         throw new UnboundValidException(
           message = s"param: B'\nexpected: ==, <, ), EOF\nactual: $token"
         )
     }
 
-  def D(): Def = ???
+  def D(): Def =
+    tok match {
+      case DEF =>
+        eat(DEF)
+        val functionName = tok match {
+          case ID(s) => s
+          case _ => throw new UnboundValidException(s"expected ID, but actual $tok")
+        }
+        advance(); eat(LPAREN)
+        val arguments = defArgs()
+        eat(RPAREN); eat(COLON)
+        val rtype = U()
+        advance()
+        val body = E()
+        Def(functionName, arguments, rtype, body)
+      case _ => throw new UnboundValidException(s"expected DEF, but actual $tok")
+    }
 
-  def defArgs(): List[(Var, Ty)] = ???
+  def defArgs(): List[(Var, Ty)] =
+    tok match {
+      case ID(s) =>
+        advance(); eat(COLON)
+        val rtype = U()
+        if (tok != RPAREN) eat(CAMMA)
+        (s, rtype) :: defArgs()
+      case RPAREN => Nil
+      case _ => throw new UnboundValidException(s"expected ID, ), but actual $tok")
+    }
+
+  def U(): Ty =
+    tok match {
+      case ID("Int") =>
+        advance(); IntTy
+      case ID("Boolean") =>
+        advance(); BoolTy
+      case ID("List") =>
+        eat(ID("List"))
+        eat(LBRACKET)
+        eat(ID("Int"))
+        eat(RBRACKET)
+        IntListTy
+      case _ =>
+        throw new UnboundValidException(message = s"expected Int, Boolean, List[Int], but actual$tok")
+    }
 
   def Ds(): List[Def] = {
     tok match {
