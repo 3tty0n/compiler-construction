@@ -13,7 +13,7 @@ class LexSpec
 {
 
   override def beforeAll(): Unit = {
-    Process("java -jar lex-sbt/lib/jflex-scala.jar --scala -d lex-sbt/src lex-sbt/flex/Sample.flex").run()
+    Process("java -jar lex-sbt/lib/jflex-scala.jar --scala -d lex-sbt/src lex-sbt/src/flex/Sample.flex").run()
     Thread.sleep(1000)
   }
 
