@@ -18,6 +18,12 @@ class ParserNonscalaTest extends FlatSpec {
     parser.D()
   }
 
+  def parseStrDefs(s: String): List[Def] = {
+    val lexer = new Yylex(new java.io.StringReader(s))
+    val parser = new ParserNonscala(lexer)
+    parser.Ds()
+  }
+
   def parseFileDef(s: String): Def = {
     val f = new java.io.File(s)
     val lexer = new Yylex(new java.io.FileReader(f))
@@ -96,7 +102,6 @@ class ParserNonscalaTest extends FlatSpec {
     assert(parseStr("x.tail") === UOpExp(TailOp, VarExp("x")))
   }
 
-
   "関数定義" should "正しく構文解析できる" in {
     assert(parseStrDef("def f(x:Int, y:Boolean): List[Int] = Nil") ===
       Def("f", List(("x", IntTy), ("y", BoolTy)), IntListTy, NilExp))
@@ -112,25 +117,65 @@ class ParserNonscalaTest extends FlatSpec {
             BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
               AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))))
 
-    assert(parseFileDef("parsing-sbt/examples/sort.scala") ===
-      Def("insert", List(("x", IntTy), ("l", IntListTy)), IntListTy,
-        IfExp(UOpExp(IsEmptyOp, VarExp("l")), BOpExp(ConsOp, VarExp("x"), NilExp),
-          IfExp(BOpExp(LtOp, VarExp("x"), UOpExp(HeadOp, VarExp("l"))), BOpExp(ConsOp, VarExp("x"), VarExp("l")), BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
-            AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))))
+    val exp =
+      """
+        |def insert(x: Int, l: List[Int]): List[Int] =
+        |  if (l.isEmpty)
+        |    x::Nil
+        |  else if (x<l.head)
+        |    x::l
+        |  else
+        |    l.head::insert(x, l.tail)
+      """.stripMargin
+    assert(parseStrDef(exp) === parseFileDef("parsing-sbt/examples/insert.scala"))
+  }
+
+  "例: sort" should "正しく構文解析できる" in {
+    val exp =
+      """
+        |def sort(l: List[Int]): List[Int] =
+        |  if (l.isEmpty)
+        |    Nil
+        |  else
+        |    insert(l.head, sort(l.tail))
+        |
+        |def insert(x: Int, l: List[Int]): List[Int] =
+        |  if (l.isEmpty)
+        |    x :: Nil
+        |  else if (x < l.head)
+        |    x :: l
+        |  else
+        |    l.head :: insert(x, l.tail)
+        |
+        |def test(n: Int): List[Int] =
+        |  if (n == 0)
+        |    Nil
+        |  else
+        |    insert(n, test(n - 1))
+      """.stripMargin
+
+    assert(parseStrDefs(exp) === parseFileDefs("parsing-sbt/examples/sort.scala"))
   }
 
   "例: insert, test" should "正しく構文解析できる" in {
-    assert(parseFileDefs("parsing-sbt/examples/insert.scala") ===
-      List(
-        Def("insert", List(("x", IntTy), ("l", IntListTy)),
-          IntListTy, IfExp(UOpExp(IsEmptyOp, VarExp("l")), BOpExp(ConsOp, VarExp("x"), NilExp),
-            IfExp(BOpExp(LtOp, VarExp("x"), UOpExp(HeadOp, VarExp("l"))),
-              BOpExp(ConsOp, VarExp("x"), VarExp("l")), BOpExp(ConsOp, UOpExp(HeadOp, VarExp("l")),
-                AppExp("insert", List(VarExp("x"), UOpExp(TailOp, VarExp("l")))))))),
-        Def("test", List(("n", IntTy)), IntListTy,
-          IfExp(BOpExp(EqOp, VarExp("n"), IntExp(0)), NilExp,
-            AppExp("insert", List(VarExp("n"), AppExp("test", List(BOpExp(MinusOp, VarExp("n"), IntExp(1)))))))))
-    )
+    val exp =
+      """
+        |def insert(x: Int, l: List[Int]): List[Int] =
+        |  if (l.isEmpty)
+        |    x::Nil
+        |  else if (x<l.head)
+        |    x::l
+        |  else
+        |    l.head::insert(x, l.tail)
+        |
+        |def test(n: Int): List[Int] =
+        |  if (n == 0)
+        |    Nil
+        |  else
+        |    insert(n, test(n-1))
+      """.stripMargin
+
+    assert(parseStrDefs(exp) === parseFileDefs("parsing-sbt/examples/insert.scala"))
   }
 
 

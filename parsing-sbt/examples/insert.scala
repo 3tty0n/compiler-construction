@@ -11,5 +11,3 @@ def test(n: Int): List[Int] =
     Nil
   else
     insert(n, test(n-1))
-
-
