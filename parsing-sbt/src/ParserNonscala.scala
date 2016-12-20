@@ -100,8 +100,6 @@ class ParserNonscala(val src: Yylex) {
     tok match {
       case ID(_) | INT(_) | LPAREN | NIL | EOF =>
         EPrime(T())
-      case IF =>
-        I()
       case _@token =>
         throw new UnboundValidException(
           message = s"param: E\nexpected: id, num, (, Nil\nactual: $token"
@@ -195,7 +193,7 @@ class ParserNonscala(val src: Yylex) {
         eat(RPAREN); eat(COLON)
         val rtype = U()
         advance()
-        val body = E()
+        val body = I()
         Def(functionName, arguments, rtype, body)
       case _ => throw new UnboundValidException(s"expected DEF, but actual $tok")
     }
