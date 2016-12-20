@@ -50,5 +50,6 @@ lazy val root = (project in file("."))
   .aggregate(
     exp,
     lex,
-    automata
+    automata,
+    parsing
   )
