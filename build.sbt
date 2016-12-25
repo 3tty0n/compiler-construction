@@ -57,5 +57,6 @@ lazy val root = (project in file("."))
     exp,
     lex,
     automata,
-    parsing
+    parsing,
+    typing
   )
