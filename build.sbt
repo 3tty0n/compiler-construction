@@ -42,6 +42,12 @@ lazy val parsing = (project in file("parsing-sbt"))
     name := "parsing-sbt"
   )
 
+lazy val typing = (project in file("typing-sbt"))
+  .settings(commonSettings: _*)
+  .settings(
+    name := "typing-sbt"
+  )
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
