@@ -38,31 +38,25 @@ object TypeCheck {
         throw new TypeError(s"types of arguments of function $f are not equaled")
       }
     case BOpExp(o, e1, e2) =>
+      val t1 = tCheck(fenv, env, e1)
+      val t2 = tCheck(fenv, env, e2)
       o match {
         case PlusOp | MinusOp | TimesOp | DivideOp =>
-          val t1 = tCheck(fenv, env, e1)
-          val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntTy) => IntTy
             case _ => throw new TypeError("+, -, *, / should be (Int) <op> (Int)")
           }
         case LtOp =>
-          val t1 = tCheck(fenv, env, e1)
-          val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntTy) => BoolTy
             case _ => throw new TypeError("< should be (Int) <op> (Int)")
           }
         case EqOp =>
-          val t1 = tCheck(fenv, env, e1)
-          val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntTy) | (IntListTy, IntListTy) => BoolTy
             case _ => throw new TypeError(s"== should be (Int) <op> (Int) or (List[Int]) <op> (List[Int])")
           }
         case ConsOp =>
-          val t1 = tCheck(fenv, env, e1)
-          val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntListTy) => IntListTy
             case _ => throw new TypeError(s":: should be (Int) <op> (List[Int])")
