@@ -6,10 +6,15 @@ import Abssyn._
 import Oper._
 import Ty._
 import TypeCheck._
+import nonscala.Tokens.EQEQ
 
 class TcheckTest extends FlatSpec {
   "変数" should "正しい型付け" in {
-    assert(tCheck(Map(), Map("x" -> IntTy), VarExp("x")) === IntTy)
+    assert(tCheck(
+      Map(),
+      Map("x" -> IntTy),
+      VarExp("x")
+    ) === IntTy)
     assertThrows[TypeError] {
       tCheck(Map(), Map(), VarExp("x"))
     }
@@ -30,17 +35,50 @@ class TcheckTest extends FlatSpec {
     }
   }
 
-  "+" should "正しい型付け" in {
+  "+, -, *, /" should "正しい型付け" in {
     assert(tCheck(
       Map(),
       Map("x" -> IntTy),
-      BOpExp(PlusOp, IntExp(1), VarExp("x"))
+      BOpExp(DivideOp, IntExp(1), VarExp("x"))
     ) === IntTy)
-    intercept[TypeError] {
+    assert(tCheck(
+      Map(),
+      Map("x" -> IntTy, "y" -> IntTy),
+      BOpExp(PlusOp, BOpExp(MinusOp, IntExp(1), VarExp("x")), BOpExp(TimesOp, VarExp("y"), IntExp(1)))
+    ) === IntTy)
+    assertThrows[TypeError] {
       tCheck(
         Map(),
         Map("x" -> BoolTy),
         BOpExp(PlusOp, IntExp(1), VarExp("x"))
+      )
+    }
+  }
+
+  "::" should "正しい型付け" in {
+    assert(tCheck(
+      Map(),
+      Map("x" -> IntTy, "y" -> IntListTy),
+      BOpExp(ConsOp, IntExp(1), BOpExp(ConsOp, IntExp(2), NilExp))
+    ) === IntListTy)
+  }
+
+  "<, ==" should "正しい型付け" in {
+    assert(tCheck(
+      Map(),
+      Map("x" -> IntTy),
+      BOpExp(EqOp, VarExp("x"), IntExp(1))
+    ) === BoolTy)
+    assert(tCheck(
+      Map(),
+      Map(),
+      BOpExp(EqOp, BOpExp(ConsOp, IntExp(1), NilExp), BOpExp(ConsOp, IntExp(2), NilExp))
+    ) === BoolTy)
+    assertThrows[TypeError] {
+      tCheck(
+        Map(),
+        Map(),
+        BOpExp(EqOp, BOpExp(ConsOp, IntExp(1), NilExp), BOpExp(PlusOp, IntExp(2), IntExp(1)))
       )
     }
   }
@@ -67,7 +105,7 @@ class TcheckTest extends FlatSpec {
     succeed
   }
 
-  "例: insert" should "正しく型付けできる" in {
+  "例: insert" should "正しく型付け" in {
     val exp =
       """
         |def insert(x: Int, l: List[Int]): List[Int] =
