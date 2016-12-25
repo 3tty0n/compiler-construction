@@ -44,8 +44,6 @@ object TypeCheck {
           val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntTy) => BoolTy
-            case (BoolTy, BoolTy) => BoolTy
-            case (IntListTy, IntListTy) => BoolTy
             case _ => throw new TypeError("==, < should be (same type) <op> (same type)")
           }
         case ConsOp =>

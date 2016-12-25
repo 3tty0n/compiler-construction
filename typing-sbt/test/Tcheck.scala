@@ -69,11 +69,6 @@ class TcheckTest extends FlatSpec {
       Map("x" -> IntTy),
       BOpExp(EqOp, VarExp("x"), IntExp(1))
     ) === BoolTy)
-    assert(tCheck(
-      Map(),
-      Map(),
-      BOpExp(EqOp, BOpExp(ConsOp, IntExp(1), NilExp), BOpExp(ConsOp, IntExp(2), NilExp))
-    ) === BoolTy)
     assertThrows[TypeError] {
       tCheck(
         Map(),
