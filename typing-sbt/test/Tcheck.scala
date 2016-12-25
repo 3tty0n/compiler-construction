@@ -96,8 +96,7 @@ class TcheckTest extends FlatSpec {
 
   "例: sort" should "正しい型付け" in {
     val ds = Main.parseFileDefs("typing-sbt/examples/sort.scala")
-    tCheckDefs(ds)
-    succeed
+    assert(tCheckDefs(ds) === IntListTy :: IntListTy :: IntListTy :: Nil)
   }
 
   "例: insert" should "正しく型付け" in {
@@ -112,8 +111,18 @@ class TcheckTest extends FlatSpec {
         |    l.head::insert(x, l.tail)
       """.stripMargin
     val ds = Main.parseStrDefs(exp)
-    tCheckDefs(ds)
-    succeed
+    assert(tCheckDefs(ds) === IntListTy :: Nil)
+  }
+
+  "例: f" should "正しく型付け" in {
+    val exp =
+      """
+        |def reverse(l: List[Int], m: List[Int]): List[Int] =
+        |  if (l == Nil) m
+        |  else reverse(l.tail, l.head :: m)
+        |
+      """.stripMargin
+    assert(tCheckDefs(Main.parseStrDefs(exp)) === IntListTy :: Nil)
   }
 
 }

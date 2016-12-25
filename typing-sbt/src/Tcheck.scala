@@ -27,9 +27,16 @@ object TypeCheck {
         case (IsEmptyOp, IntListTy) => BoolTy
         case (HeadOp, IntListTy) => IntTy
         case (TailOp, IntListTy) => IntListTy
-        case _ => throw new TypeError("UOpExp")
+        case _ => throw new TypeError(s"isEmpty, head, and tail should be applied for List[Int]")
       }
-    case AppExp(f, es) => fenv(f).result
+    case AppExp(f, es) =>
+      val typeList = es.map(e => tCheck(fenv, env, e))
+      val FuncTy(funcTypes, result) = fenv.getOrElse(f, throw new TypeError(s"Cannot get type of function $f"))
+      if ((funcTypes, typeList).zipped.forall { case (t1, t2) => t1 == t2 }) {
+        result
+      } else {
+        throw new TypeError(s"types of arguments of function $f are not equaled")
+      }
     case BOpExp(o, e1, e2) =>
       o match {
         case PlusOp | MinusOp | TimesOp | DivideOp =>
@@ -39,20 +46,29 @@ object TypeCheck {
             case (IntTy, IntTy) => IntTy
             case _ => throw new TypeError("+, -, *, / should be (Int) <op> (Int)")
           }
-        case EqOp | LtOp =>
+        case LtOp =>
           val t1 = tCheck(fenv, env, e1)
           val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntTy) => BoolTy
-            case _ => throw new TypeError("==, < should be (same type) <op> (same type)")
+            case _ => throw new TypeError("< should be (Int) <op> (Int)")
+          }
+        case EqOp =>
+          val t1 = tCheck(fenv, env, e1)
+          val t2 = tCheck(fenv, env, e2)
+          (t1, t2) match {
+            case (IntTy, IntTy) | (IntListTy, IntListTy) => BoolTy
+            case _ => throw new TypeError(s"== should be (Int) <op> (Int) or (List[Int]) <op> (List[Int])")
           }
         case ConsOp =>
           val t1 = tCheck(fenv, env, e1)
           val t2 = tCheck(fenv, env, e2)
           (t1, t2) match {
             case (IntTy, IntListTy) => IntListTy
-            case _ => throw new TypeError("ConsOp")
+            case _ => throw new TypeError(s":: should be (Int) <op> (List[Int])")
           }
+        case _ =>
+          throw new TypeError(s"+, -, *, /, <, ==, :: should be applied here, but actual $o")
       }
     case IfExp(exp, e1, e2) =>
       tCheck(fenv, env, exp) match {
@@ -74,7 +90,7 @@ object TypeCheck {
   }
 
   // 型エラーがあった場合は, 例外 TypeError を発生させる
-  def tCheckDefs(ds: List[Def]): Unit = {
+  def tCheckDefs(ds: List[Def]): List[Ty] = {
     val fenv = defs2fenv(ds)
     val env = defs2env(ds)
     ds.map(d => tCheck(fenv, env, d.body))
