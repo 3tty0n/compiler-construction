@@ -66,7 +66,13 @@ object TypeCheck {
       }
     case IfExp(exp, e1, e2) =>
       tCheck(fenv, env, exp) match {
-        case BoolTy => tCheck(fenv, env, e1)
+        case BoolTy =>
+          val t1 = tCheck(fenv, env, e1)
+          val t2 = tCheck(fenv, env, e2)
+          (t1, t2) match {
+            case _ if t1 == t2 => t1
+            case _ => throw new TypeError("If expression should be if (boolean) <same type> else <same type>")
+          }
         case _ => throw new TypeError("If expression should have boolean expression first")
       }
   }
