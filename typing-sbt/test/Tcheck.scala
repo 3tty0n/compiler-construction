@@ -117,9 +117,9 @@ class TcheckTest extends FlatSpec {
   "例: f" should "正しく型付け" in {
     val exp =
       """
-        |def reverse(l: List[Int], m: List[Int]): List[Int] =
-        |  if (l == Nil) m
-        |  else reverse(l.tail, l.head :: m)
+        |def f(x: Int): List[Int] =
+        |  if (x < 1) Nil
+        |  else x :: Nil
         |
       """.stripMargin
     assert(tCheckDefs(Main.parseStrDefs(exp)) === IntListTy :: Nil)

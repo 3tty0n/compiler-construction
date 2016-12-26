@@ -53,8 +53,8 @@ object TypeCheck {
           }
         case EqOp =>
           (t1, t2) match {
-            case (IntTy, IntTy) | (IntListTy, IntListTy) => BoolTy
-            case _ => throw new TypeError(s"== should be (Int) <op> (Int) or (List[Int]) <op> (List[Int])")
+            case (IntTy, IntTy) => BoolTy
+            case _ => throw new TypeError(s"== should be (Int) <op> (Int)")
           }
         case ConsOp =>
           (t1, t2) match {
