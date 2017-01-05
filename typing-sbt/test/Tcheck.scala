@@ -1,12 +1,10 @@
 package nonscala
 
 import org.scalatest._
-import Base._
 import Abssyn._
 import Oper._
 import Ty._
 import TypeCheck._
-import nonscala.Tokens.EQEQ
 
 class TcheckTest extends FlatSpec {
   "変数" should "正しい型付け" in {
