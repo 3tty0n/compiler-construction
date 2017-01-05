@@ -17,6 +17,8 @@ lazy val commonSettings = Seq(
   )
 )
 
+lazy val jFlex = SettingKey[File]("JFlex")
+
 lazy val exp = (project in file("exp-sbt"))
   .settings(commonSettings: _*)
   .settings(
@@ -25,9 +27,25 @@ lazy val exp = (project in file("exp-sbt"))
 
 lazy val lex = (project in file("lex-sbt"))
   .settings(commonSettings: _*)
-  .settings(sbtjflex.SbtJFlexPlugin.jflexSettings: _*)
   .settings(
-    name := "lex-sbt"
+    name := "lex-sbt",
+    name in jFlex := "Sample.flex",
+    sourceDirectory in jFlex := baseDirectory.value / "flex",
+    TaskKey[Unit]("jflex-generate") := {
+      val logger = streams.value.log
+      val process = sbt.Process(
+        "java" ::
+          "-jar" ::
+          "lib/jflex-scala.jar" ::
+          "--scala" ::
+          "-d" ::
+          (scalaSource in Compile).value.toString ::
+          ((sourceDirectory in jFlex).value / (name in jFlex).value).toString :: Nil
+      )
+      val out = (process!!)
+      if (out != null) logger.info(out) else logger.error("unexpected error has occured")
+      ()
+    }
   )
 
 lazy val automata = (project in file("automata-sbt"))

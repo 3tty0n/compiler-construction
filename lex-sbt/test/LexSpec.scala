@@ -12,11 +12,6 @@ class LexSpec
     with BeforeAndAfterAll
 {
 
-  override def beforeAll(): Unit = {
-    Process("java -jar lex-sbt/lib/jflex-scala.jar --scala -d lex-sbt/src lex-sbt/src/flex/Sample.flex").run()
-    Thread.sleep(1000)
-  }
-
   "flex" should "正しく正規表現を定義できている" in {
     new Yylex(new StringReader("1")).yylex() should equal (NUM(1))
     new Yylex(new StringReader("if")).yylex() should equal (IF)
@@ -32,6 +27,5 @@ class LexSpec
   it should "予約語を `` で囲むと識別子として使用できる" in {
     new Yylex(new StringReader("`if`")).yylex() should equal (ID("if"))
   }
-
 
 }
