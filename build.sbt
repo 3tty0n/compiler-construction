@@ -66,6 +66,14 @@ lazy val typing = (project in file("typing-sbt"))
     name := "typing-sbt"
   )
 
+lazy val eval = (project in file("eval-sbt")).
+  settings(commonSettings: _*).
+  settings(
+    name := "eval-sbt",
+    assemblyJarName in assembly := "eval.jar"
+  )
+
+
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
@@ -76,5 +84,6 @@ lazy val root = (project in file("."))
     lex,
     automata,
     parsing,
-    typing
+    typing,
+    eval
   )
