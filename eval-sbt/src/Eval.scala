@@ -40,17 +40,14 @@ object Eval {
             IntVal(i1 / i2)
           case (EqOp, IntVal(b1), IntVal(b2)) =>
             BoolVal(b1 == b2)
-          case (EqOp, ListVal(l1), ListVal(l2)) =>
-            BoolVal(l1 == l2)
           case (LtOp, IntVal(b1), IntVal(b2)) =>
             BoolVal(b1 < b2)
-          case (ConsOp, IntVal(i1), IntVal(i2)) =>
-            ListVal(i1 :: i2 :: Nil)
           case (ConsOp, IntVal(i), ListVal(l)) =>
             ListVal(i :: l)
         }
       case IfExp(exp, e1, e2) =>
-        eval(fenv, env, exp) match {
+        lazy val expValue = eval(fenv, env, exp)
+        expValue match {
           case BoolVal(bool) if bool =>
             eval(fenv, env, e1)
           case BoolVal(bool) if !bool =>
@@ -61,8 +58,8 @@ object Eval {
         (o, v1) match {
           case (IsEmptyOp, ListVal(Nil)) => BoolVal(true)
           case (IsEmptyOp, ListVal(_ :: _)) => BoolVal(false)
-          case (HeadOp, ListVal(h :: t)) => IntVal(h)
-          case (TailOp, ListVal(h :: t)) => ListVal(t)
+          case (HeadOp, ListVal(h :: _)) => IntVal(h)
+          case (TailOp, ListVal(_ :: t)) => ListVal(t)
         }
       case AppExp(f, es) =>
         val FValue(xs, body) = fenv(f)
