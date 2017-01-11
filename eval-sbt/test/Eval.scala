@@ -6,22 +6,24 @@ import Abssyn._
 import Oper._
 import Eval._
 
+import scala.util.control.NonFatal
+
 class EvalTest extends FlatSpec {
   "変数" should "正しい値" in {
-    assert(eval(Map(), Map("x" -> IntVal(1)), VarExp("x")) == IntVal(1))
+    assert(eval(Map(), Map("x" -> IntVal(1)), VarExp("x")) === IntVal(1))
   }
 
   "+" should "正しい値" in {
     assert(eval(Map(), Map("x" -> IntVal(1)),
-      BOpExp(PlusOp, IntExp(1), VarExp("x"))) == IntVal(2))
+      BOpExp(PlusOp, IntExp(1), VarExp("x"))) === IntVal(2))
   }
 
 
   "isEmpty" should "正しい値" in {
     assert(eval(Map(), Map("x" -> ListVal(Nil)),
-      UOpExp(IsEmptyOp, VarExp("x"))) == BoolVal(true))
+      UOpExp(IsEmptyOp, VarExp("x"))) === BoolVal(true))
     assert(eval(Map(), Map("x" -> ListVal(List(1, 2))),
-      UOpExp(IsEmptyOp, VarExp("x"))) == BoolVal(false))
+      UOpExp(IsEmptyOp, VarExp("x"))) === BoolVal(false))
 
   }
 
@@ -34,9 +36,6 @@ class EvalTest extends FlatSpec {
         AppExp("f", List(IntExp(1), VarExp("x")))
       ) === ListVal(List(1, 2))
     )
-  }
-
-  it should "正しい値を返す" in {
     assert(
       eval(
         Map("f" -> FValue(List("x"), VarExp("x"))),
@@ -47,7 +46,11 @@ class EvalTest extends FlatSpec {
   }
 
   "例: sort" should "正しい値" in {
-    val ds = Main.parseFileDefs("eval-sbt/examples/sort.scala")
+    val ds = try {
+      Main.parseFileDefs("eval-sbt/examples/sort.scala")
+    } catch {
+      case NonFatal(_) => Main.parseFileDefs("examples/sort.scala")
+    }
     val fenv = defs2env(ds)
     assert(
       eval(
@@ -59,7 +62,11 @@ class EvalTest extends FlatSpec {
   }
 
   "例: qsort" should "正しい値" in {
-    val ds = Main.parseFileDefs("eval-sbt/examples/qsort.scala")
+    val ds = try {
+      Main.parseFileDefs("eval-sbt/examples/qsort.scala")
+    } catch {
+      case NonFatal(_) => Main.parseFileDefs("examples/qsort.scala")
+    }
     val fenv = defs2env(ds)
     assert(
       eval(
@@ -71,7 +78,11 @@ class EvalTest extends FlatSpec {
   }
 
   "例: primes" should "正しい値" in {
-    val ds = Main.parseFileDefs("eval-sbt/examples/primes.scala")
+    val ds = try {
+      Main.parseFileDefs("eval-sbt/examples/primes.scala")
+    } catch {
+      case NonFatal(_) => Main.parseFileDefs("examples/primes.scala")
+    }
     val fenv = defs2env(ds)
     assert(
       eval(
@@ -81,6 +92,4 @@ class EvalTest extends FlatSpec {
       ) === ListVal(List(2, 3, 5, 7, 11, 13, 17, 19))
     )
   }
-
-
 }
