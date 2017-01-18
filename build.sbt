@@ -73,13 +73,17 @@ lazy val eval = (project in file("eval-sbt")).
     assemblyJarName in assembly := "eval.jar"
   )
 
+lazy val codegen = (project in file("codegen")).
+  settings(commonSettings: _*).
+  settings(
+    name := "codegen"
+  )
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
     name := "compiler construction"
-  )
-  .aggregate(
+  ).aggregate(
     exp,
     lex,
     automata,
