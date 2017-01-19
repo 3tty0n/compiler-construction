@@ -9,7 +9,9 @@ initialCommands in console :=
   """
     |import nonscala._
     |import Abssyn._
-    |import Oper._
+    |import Asm._
+    |import Emit._
     |import CodegenBase._
+    |import Oper._
     |import ILExec._
   """.stripMargin
