@@ -31,7 +31,7 @@ object Asm {
   // スピルした変数（フレームに割り当てる前）
   // 課題6bでは使用しない
   case class MemTmp(s: String) extends Mem {
-    override def toString() = "L_"+s 
+    override def toString() = "L_" + s
   }
   // スピルした変数（フレームに割り当てた後）
   // 課題6bでは使用しない
