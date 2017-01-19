@@ -89,5 +89,6 @@ lazy val root = (project in file("."))
     automata,
     parsing,
     typing,
-    eval
+    eval,
+    codegen
   )

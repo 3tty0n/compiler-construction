@@ -7,7 +7,7 @@ sudo: false
 cache:
   directories:
     - $HOME/.ivy2/cache
-      - $HOME/.sbt/launchers
+    - $HOME/.sbt/launchers
   script:
     - sbt ++$TRAVIS_SCALA_VERSION test
     - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
